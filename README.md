@@ -36,7 +36,7 @@ Notes: total tokens barely move because the fixed context (system prompt, tools)
 
 ---
 
-## 📊 Original Benchmark (single task, Gemini Flash, estimates)
+## 📊 Original Benchmark 
 
 > Single task, n=1, token counts *estimated from transcript bytes*, against a hypothetical verbose baseline. Treat as illustrative, not as a general result.
 
