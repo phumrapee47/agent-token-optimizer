@@ -3,10 +3,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Total Tokens](https://img.shields.io/badge/Total_Tokens-2--8%25_lower_(Claude_Code)-brightgreen.svg)](#-measured-on-claude-code)
 [![Output Tokens](https://img.shields.io/badge/Output-10--20%25_lower_(Claude_Code)-blue.svg)](#-measured-on-claude-code)
-[![Platform](https://img.shields.io/badge/Supports-Claude_Code_|_Antigravity_|_Cursor_|_Aider-blueviolet.svg)](#quick-installation)
+[![Tested on](https://img.shields.io/badge/Tested_on-Claude_Code_(Sonnet_5)-blueviolet.svg)](#-measured-on-claude-code)
 
 > **A battle-tested, research-backed token optimization ruleset and benchmark harness for AI Coding Assistants.**  
 > Measured on Claude Code (Sonnet 5, 7 tasks, 3 reps): output tokens **~10-20% lower**, total tokens **~2-8% lower**. Quality was unchanged on most tasks, but open-ended code review lost items in some runs. See [measured results](#-measured-on-claude-code) and [benchmarks/claude-code/RESULTS.md](benchmarks/claude-code/RESULTS.md).
+
+**Platform status:** Claude Code is measured (see below). Antigravity / Gemini rules are included (`rules/GEMINI.md`) but only have the single-task estimate further down. Cursor and Aider are untested: the rules are plain text and can be adapted, but there are no results for them.
 
 ---
 
@@ -26,6 +28,7 @@ Real usage numbers from `claude -p --output-format json` (model `claude-sonnet-5
 
 | Ruleset | Output tokens | Total tokens | Quality (0-1) |
 | :--- | :--- | :--- | :--- |
+| *No rules (baseline)* | 0% | 0% | 0.95-0.99 (varies by batch) |
 | `rules/CLAUDE.md` | -13% | -5% | 0.92 |
 | `skills/token-optimizer/SKILL.md` | -13% | -2% | 0.97 |
 
@@ -76,32 +79,39 @@ Our ruleset is formulated as an enforceable contract:
 6. **Command Output Filtering**: Pipe shell and test outputs through `head -n 25`, `tail -n 25`, or `grep -E "ERROR|FAIL"`.
 7. **Doom Loop Circuit Breaker**: If an edit or command fails twice with similar error traces, abort immediately and emit a 1-turn diagnosis. Never loop blindly.
 
+> `skills/token-optimizer/SKILL.md` expresses the same ruleset slightly differently: directives 1-2 are merged into "Search → Slice → Act", and it adds a "Context Hygiene" directive (delegate broad searches to subagents, keep 2-3 files in focus).
+
 ---
 
 ## 🚀 Quick Installation
 
 ### For Claude Code CLI (`claude`)
 
-**Option 1: Global (Applies to all projects automatically)**
+> **Back up first.** If you already have a `~/.claude/CLAUDE.md`, the commands below *append* to it instead of overwriting it. Review the result for duplicate or conflicting rules.
+
+**Option 1: Global (applies to all projects)**
 ```powershell
-# Windows
-Copy-Item rules\CLAUDE.md "$env:USERPROFILE\.claude\CLAUDE.md" -Force
+# Windows: append to your existing global CLAUDE.md (creates it if missing)
+Add-Content -Path "$env:USERPROFILE\.claude\CLAUDE.md" -Value (Get-Content rules\CLAUDE.md -Raw)
 ```
 ```bash
 # macOS / Linux
-cp rules/CLAUDE.md ~/.claude/CLAUDE.md
+mkdir -p ~/.claude && cat rules/CLAUDE.md >> ~/.claude/CLAUDE.md
 ```
 
-**Option 2: Per-Project**
-Drop `rules/CLAUDE.md` directly into the root directory of your repository.
+**Option 2: Per-project**
+Copy `rules/CLAUDE.md` to the root of your repository (or append it to the `CLAUDE.md` already there).
+
+**Option 3: As a skill**
+Copy `skills/token-optimizer/` to `~/.claude/skills/token-optimizer/` (global) or `.claude/skills/token-optimizer/` (project). The skill uses the tool names in its "Tool names" note; the measured results above were run with the skill text applied as always-on instructions.
 
 ---
 
 ### For Google Antigravity / Gemini
 
-**Option 1: Global Rule**
+**Option 1: Global Rule** (append, so an existing `GEMINI.md` is not lost)
 ```powershell
-Copy-Item rules\GEMINI.md "$env:USERPROFILE\.gemini\config\GEMINI.md" -Force
+Add-Content -Path "$env:USERPROFILE\.gemini\config\GEMINI.md" -Value (Get-Content rules\GEMINI.md -Raw)
 ```
 
 **Option 2: As a Modular Skill**
@@ -111,19 +121,21 @@ Copy the `skills/token-optimizer` directory to:
 
 ---
 
-## 🔬 Benchmark Tool
+## 🔬 Benchmark Tools
 
-We include a PowerShell transcript analyzer that inspects JSONL conversation logs and computes byte / token usage:
+**Claude Code:** use the harness in [`benchmarks/claude-code/`](benchmarks/claude-code/README.md). It runs each ruleset through headless `claude -p` and reads real token usage.
+
+**Antigravity / Gemini:** `benchmarks/benchmark.ps1` is a PowerShell transcript analyzer for **Antigravity** conversation logs (default `~/.gemini/antigravity/brain`). It does *not* read Claude Code sessions, and it estimates tokens from bytes.
 
 ```powershell
-# Analyze a single session
-.\benchmarks\benchmark.ps1 -BaselineId "<conversation-id>"
+# Analyze a single Antigravity session
+.enchmarksenchmark.ps1 -BaselineId "<conversation-id>"
 
 # A/B compare two sessions
-.\benchmarks\benchmark.ps1 -BaselineId "<baseline-id>" -OptimizedId "<optimized-id>"
+.enchmarksenchmark.ps1 -BaselineId "<baseline-id>" -OptimizedId "<optimized-id>"
 
 # List recent sessions
-.\benchmarks\benchmark.ps1
+.enchmarksenchmark.ps1
 ```
 
 ---
