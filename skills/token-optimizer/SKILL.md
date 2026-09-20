@@ -8,6 +8,9 @@ description: >-
 
 # Token Optimizer
 
+## Tool names
+Rules below use Antigravity tool names. In Claude Code use `Grep` (grep_search), `Read` with `offset`/`limit` (view_file with StartLine/EndLine), `Edit` (replace_file_content).
+
 ## Core Rules (Always Apply)
 
 ### 1. Search → Slice → Act (Never Read Blind)
