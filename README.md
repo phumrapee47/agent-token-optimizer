@@ -1,12 +1,12 @@
 # ⚡ Agent Token Optimizer
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Token Reduction](https://img.shields.io/badge/Token_Reduction-64.6%25-brightgreen.svg)](#benchmark-results)
-[![Output Reduction](https://img.shields.io/badge/Output_Cut-86.7%25-blue.svg)](#benchmark-results)
+[![Total Tokens](https://img.shields.io/badge/Total_Tokens-2--8%25_lower_(Claude_Code)-brightgreen.svg)](#-measured-on-claude-code)
+[![Output Tokens](https://img.shields.io/badge/Output-10--20%25_lower_(Claude_Code)-blue.svg)](#-measured-on-claude-code)
 [![Platform](https://img.shields.io/badge/Supports-Claude_Code_|_Antigravity_|_Cursor_|_Aider-blueviolet.svg)](#quick-installation)
 
 > **A battle-tested, research-backed token optimization ruleset and benchmark harness for AI Coding Assistants.**  
-> Slashes LLM token consumption by **~65%** and output tokens by **~87%** with **zero loss in code quality**.
+> Measured on Claude Code (Sonnet 5, 7 tasks, 3 reps): output tokens **~10-20% lower**, total tokens **~2-8% lower**. Quality was unchanged on most tasks, but open-ended code review lost items in some runs. See [measured results](#-measured-on-claude-code) and [benchmarks/claude-code/RESULTS.md](benchmarks/claude-code/RESULTS.md).
 
 ---
 
@@ -20,9 +20,24 @@ Autonomous AI coding agents (Claude Code, Antigravity, Cursor, Aider) suffer fro
 
 ---
 
-## 📊 Benchmark Results
+## 🧪 Measured on Claude Code
 
-Evaluated across identical tasks, models (`Google Flash`), and files using our PowerShell transcript analyzer:
+Real usage numbers from `claude -p --output-format json` (model `claude-sonnet-5`), automatic grading, deltas vs. *no rules* in the same batch:
+
+| Ruleset | Output tokens | Total tokens | Quality (0-1) |
+| :--- | :--- | :--- | :--- |
+| `rules/CLAUDE.md` | -13% | -5% | 0.92 |
+| `skills/token-optimizer/SKILL.md` | -13% | -2% | 0.97 |
+
+Notes: total tokens barely move because the fixed context (system prompt, tools) is re-sent every turn and dominates. Run-to-run noise is about 8-10%, so differences below that are not meaningful. Code-review style tasks can lose findings when output is capped. Method, limitations and comparisons with other public rulesets: [benchmarks/claude-code/RESULTS.md](benchmarks/claude-code/RESULTS.md).
+
+---
+
+## 📊 Original Benchmark (single task, Gemini Flash, estimates)
+
+> Single task, n=1, token counts *estimated from transcript bytes*, against a hypothetical verbose baseline. Treat as illustrative, not as a general result.
+
+Evaluated on one task, model (`Google Flash`), and file using our PowerShell transcript analyzer:
 
 | Metric | Baseline (Verbose) | Optimized | Ultra (Optimal) | Extreme |
 | :--- | :--- | :--- | :--- | :--- |
@@ -57,7 +72,7 @@ Our ruleset is formulated as an enforceable contract:
 2. **Slice, Don't Slurp**: When reading files, enforce `StartLine` and `EndLine` slices (~50–100 lines max).
 3. **Zero-Echo Principle**: Never repeat inspected file contents or command logs. Cite as `path:L##-L##`.
 4. **Surgical Edits**: Use targeted search/replace blocks with 3–5 line anchors. Never rewrite entire files. Trust tool execution status; do not re-read files immediately to verify edits.
-5. **Output Budgeting**: Direct answers only. No conversational pleasantries ("Sure!", "Here is..."), no restating prompts, no post-action summaries. Use concise bullet points or tables.
+5. **Output Budgeting**: Max 3 sentences unless detail is requested. Direct answers only. No conversational pleasantries ("Sure!", "Here is..."), no restating prompts, no post-action summaries. Use concise bullet points or tables.
 6. **Command Output Filtering**: Pipe shell and test outputs through `head -n 25`, `tail -n 25`, or `grep -E "ERROR|FAIL"`.
 7. **Doom Loop Circuit Breaker**: If an edit or command fails twice with similar error traces, abort immediately and emit a 1-turn diagnosis. Never loop blindly.
 

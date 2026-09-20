@@ -46,10 +46,9 @@ description: >-
 - If same error appears twice after fix attempts: STOP, diagnose in 1 turn
 - Never retry blindly — emit structured diagnosis instead
 
-## When NOT to Optimize
-- User asks for detailed explanation
-- Debugging complex multi-file issues (context matters)
-- First interaction on new codebase
+## When to Relax
+- User asks for detailed explanation: give the detail
+- Complex multi-file debugging: read what the fix needs, but keep the output rules
 
 ## Verification
-See [benchmark script](./scripts/benchmark.ps1) and [measurement guide](./references/measuring-tokens.md).
+See [benchmark script](../../benchmarks/benchmark.ps1) and [measurement guide](./references/measuring-tokens.md).
