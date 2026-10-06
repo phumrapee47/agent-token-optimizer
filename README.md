@@ -35,38 +35,6 @@ Real usage numbers from `claude -p --output-format json` (model `claude-sonnet-5
 Notes: total tokens barely move because the fixed context (system prompt, tools) is re-sent every turn and dominates. Run-to-run noise is about 8-10%, so differences below that are not meaningful. Code-review style tasks can lose findings when output is capped. Method, limitations and comparisons with other public rulesets: [benchmarks/claude-code/RESULTS.md](benchmarks/claude-code/RESULTS.md).
 
 ---
-
-## 📊 Original Benchmark 
-
-> Single task, n=1, token counts *estimated from transcript bytes*, against a hypothetical verbose baseline. Treat as illustrative, not as a general result.
-
-Evaluated on one task, model (`Google Flash`), and file using our PowerShell transcript analyzer:
-
-| Metric | Baseline (Verbose) | Optimized | Ultra (Optimal) | Extreme |
-| :--- | :--- | :--- | :--- | :--- |
-| **Total Bytes** | 44.8 KB | 18.9 KB | **15.9 KB** | 19.1 KB |
-| **Est. Tokens** | ~11,477 | ~4,832 | **~4,063** | ~4,885 |
-| **Output Bytes** | 19.5 KB | 2.9 KB | **2.6 KB** | 3.8 KB |
-| **Thinking Bytes** | 11.0 KB | 937 B | **2.4 KB** | 3.2 KB |
-| **Input Bytes** | 14.3 KB | 15.0 KB | **10.9 KB** | 12.0 KB |
-| **Tool Calls** | 2 | 4 | **5** | 11 |
-| **Total Token Savings** | Baseline | **-57.9%** | **-64.6%** 🚀 | -57.4% |
-
-```
-Token Footprint Comparison:
-
-Baseline   ████████████████████████████████████████  ~11,477 tokens
-Optimized  ████████████████▋                          ~4,832 tokens (-57.9%)
-Ultra      ██████████████                             ~4,063 tokens (-64.6%)  <-- SWEET SPOT
-Extreme    ████████████████▉                          ~4,885 tokens (-57.4%)
-```
-
-> **Why Ultra won over Extreme**: Over-constraining the agent caused fragmented tool calls (11 calls vs 5), which increased input metadata overhead. **Ultra represents the empirical sweet spot.**
-
-See full evaluation in [benchmarks/benchmark_results.md](benchmarks/benchmark_results.md).
-
----
-
 ## 🎯 The 7 Core Directives
 
 Our ruleset is formulated as an enforceable contract:
